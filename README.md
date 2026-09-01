@@ -1,161 +1,200 @@
 # WebGPU AI Chat
 
-https://mspnetdev.github.io/WebGPUChat/
+Live demo:
 
-A lightweight browser-based AI chat application that runs supported language models locally on the GPU through WebGPU and `@mlc-ai/web-llm`.
+<https://mspnetdev.github.io/WebGPUChat/>
 
-The interface provides:
+WebGPU AI Chat is a browser-based application that runs supported language models locally through WebGPU and `@mlc-ai/web-llm`.
 
-- Automatic WebGPU availability checks
-- Model filtering based on estimated GPU memory
-- Local model loading and inference
-- Streaming chat responses
-- Live prompt-processing and token-generation metrics
-- VRAM release and chat reset controls
+The application also exposes diagnostic tools through the experimental WebMCP API, allowing the registered tools to be discovered, inspected, and executed from both the interface and Chrome DevTools.
 
-## Requirements
+## Features
 
-- A WebGPU-compatible browser, preferably a recent version of Google Chrome or Microsoft Edge
+### WebMCP Test Console
+
+- Detects whether WebMCP is available in the browser
+- Registers WebMCP tools through `document.modelContext`
+- Lists the tools exposed by the page
+- Executes tools directly from the application interface
+- Displays structured JSON results
+- Integrates with Chrome DevTools under **Application > WebMCP**
+
+Available tools:
+
+- `get_webgpu_chat_status`
+- `list_compatible_models`
+
+### WebGPU Test Console
+
+- Checks WebGPU browser support
+- Displays selected WebGPU adapter limits
+- Filters models according to estimated GPU memory
+- Loads and runs supported language models locally
+- Streams chat responses
+- Displays prompt-processing, token-generation, and total-time metrics
+- Releases allocated VRAM and resets the chat session
+- Provides access instructions for `chrome://gpu`
+
+### Responsive interface
+
+- Desktop, tablet, and mobile layouts
+- Full-width diagnostic panels
+- Touch-friendly controls
+- Responsive model configuration and GPU metrics
+- Mobile chat area with adaptive height
+- Input controls optimized to prevent automatic zoom on mobile browsers
+- Wrapped diagnostic output without horizontal page overflow
+
+## Browser requirements
+
+- A recent WebGPU-compatible version of Google Chrome or Microsoft Edge
 - A compatible GPU with updated drivers
-- Node.js and npm
-- An internet connection for the initial model download
+- JavaScript enabled
+- An internet connection for the WebLLM library and initial model download
+- HTTPS when deployed publicly
 
-You can inspect browser GPU support by opening:
+Node.js is not required for the GitHub Pages deployment because WebLLM is imported from a CDN.
+
+## Required Chrome settings
+
+### 1. Inspect WebGPU support
+
+Open the following internal Chrome page:
 
 ```text
 chrome://gpu
 ```
 
+Under **Graphics Feature Status**, verify that WebGPU is enabled and hardware accelerated.
+
+The application includes a **Copy chrome://gpu** button. Chrome does not allow a normal web page to open internal `chrome://` URLs directly, so the address must be copied and pasted into a new tab.
+
+### 2. Enable WebMCP testing
+
+Open:
+
+```text
+chrome://flags/#enable-webmcp-testing
+```
+
+Then:
+
+1. Set the WebMCP testing flag to **Enabled**.
+2. Select **Relaunch** or completely close and restart Chrome.
+3. Open the application again.
+4. Open Chrome DevTools.
+5. Navigate to **Application > WebMCP**.
+
+The following tools should appear under **Available Tools**:
+
+```text
+get_webgpu_chat_status
+list_compatible_models
+```
+
+The application includes a **Copy WebMCP Chrome Flag** button because a web page cannot directly navigate to a `chrome://flags` address.
+
+## Test WebMCP from the interface
+
+1. Enable the WebMCP Chrome flag and relaunch the browser.
+2. Open the deployed application.
+3. Check that the WebMCP status reports the available tools.
+4. Select **Refresh WebMCP Tools** if the list is not immediately visible.
+5. Select **Run Tool** under `get_webgpu_chat_status`.
+6. Inspect the JSON result displayed in the WebMCP console.
+7. Select **Run Tool** under `list_compatible_models`.
+8. Open **Chrome DevTools > Application > WebMCP** to inspect the corresponding tool activity, inputs, outputs, and status.
+
+## Test WebGPU and the local chat
+
+1. Open the application in a WebGPU-compatible browser.
+2. Select **Refresh WebGPU Status**.
+3. Inspect the WebGPU diagnostic output.
+4. Select a compatible model.
+5. Select **Initialize**.
+6. Wait for the model download and WebGPU initialization.
+7. Enter a message in the chat field.
+8. Select **Send**.
+9. Inspect the live GPU metrics.
+10. Select **Clear VRAM / Reset** to unload the model and reset the session.
+
 ## Project structure
 
 ```text
-project-folder/
-├── WebGPUChat_EN.html
-├── README.rd
-└── node_modules/
+WebGPUChat/
+├── index.html
+├── README.md
+└── .gitignore
 ```
 
-The HTML file imports WebLLM directly from:
+The application imports WebLLM from the CDN:
 
 ```javascript
-./node_modules/@mlc-ai/web-llm/lib/index.js
+import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 ```
 
-The `node_modules` directory must therefore be available in the deployed project unless the import is replaced with a bundled or CDN-based dependency.
-
-## Local installation
-
-Create a project directory and place `WebGPUChat_EN.html` inside it, then run:
-
-```bash
-npm init -y
-npm install @mlc-ai/web-llm
-```
+Do not publish `node_modules` to GitHub Pages.
 
 ## Run locally
 
-The application must be served through HTTP. Do not open the HTML file directly with a `file://` URL.
+The application must be served through HTTP or HTTPS. Do not open `index.html` directly through a `file://` URL.
 
-Using `npx serve`:
-
-```bash
-npx serve .
-```
-
-Alternatively, using Python:
+### Python
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Then open one of the following addresses:
+Open:
 
 ```text
-http://localhost:3000/WebGPUChat_EN.html
+http://localhost:8080/
 ```
 
-or, when using the Python server:
+### Node.js
+
+```bash
+npx serve .
+```
+
+Open the address printed by `serve` in the terminal.
+
+## Deploy to GitHub Pages
+
+1. Ensure the main application file is named:
 
 ```text
-http://localhost:8080/WebGPUChat_EN.html
+index.html
 ```
 
-The exact port displayed by `npx serve` may differ if the default port is already in use.
-
-## Production deployment
-
-### Option 1: Static web server
-
-1. Install the dependencies:
+2. Commit and push the project:
 
 ```bash
-npm install
+git add index.html README.md .gitignore
+git commit -m "Update WebGPU and WebMCP test interface"
+git push
 ```
 
-2. Upload the complete project directory, including `node_modules`, to a server that supports HTTPS.
-3. Configure the server to expose `WebGPUChat_EN.html` and the dependency files with the correct MIME types.
-4. Open the deployed HTML page through HTTPS.
+3. Open the repository settings on GitHub.
+4. Navigate to **Pages**.
+5. Under **Build and deployment**, select **Deploy from a branch**.
+6. Select the deployment branch, normally `main`.
+7. Select the root folder `/`.
+8. Save the configuration.
+9. Wait for the Pages deployment workflow to complete.
+10. Reload the deployed page with an uncached refresh:
 
-Example Nginx configuration:
-
-```nginx
-server {
-    listen 443 ssl;
-    server_name example.com;
-
-    root /var/www/webgpu-chat;
-    index WebGPUChat_EN.html;
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
-}
+```text
+Ctrl + Shift + R
 ```
 
-### Option 2: Deploy with a Node.js static server
+## Important notes
 
-Install a static server package:
-
-```bash
-npm install serve
-```
-
-Add the following script to `package.json`:
-
-```json
-{
-  "scripts": {
-    "start": "serve ."
-  }
-}
-```
-
-Start the application with:
-
-```bash
-npm start
-```
-
-### Option 3: Static hosting platforms
-
-The project can be deployed to platforms such as Azure Static Web Apps, Netlify, Vercel, or GitHub Pages, but the current relative import requires the `node_modules/@mlc-ai/web-llm` files to be included in the published output.
-
-For a cleaner production deployment, use a JavaScript bundler such as Vite so that WebLLM is included in the generated build assets instead of publishing the complete `node_modules` directory.
-
-## Important deployment notes
-
-- Use HTTPS in production because WebGPU availability may depend on a secure browser context.
-- Model files are downloaded when a model is initialized and may require significant bandwidth and browser storage.
-- Performance and available models depend on GPU capabilities and available VRAM.
-- Browser security policies prevent automatically opening internal URLs such as `chrome://gpu`.
-- The application performs inference locally in the browser after the selected model has been downloaded.
-
-## Start the application
-
-1. Open the deployed page in a WebGPU-compatible browser.
-2. Wait for the hardware compatibility check.
-3. Select one of the available models.
-4. Click **Initialize**.
-5. Wait for the model download and GPU initialization to complete.
-6. Enter a message and click **Send**.
-7. Use **Clear VRAM / Reset** to unload the model and clear the chat session.
+- WebMCP is experimental and requires a compatible Chrome version and the testing flag.
+- The Chrome flag must be enabled separately on every browser profile or device used for testing.
+- Mobile Chrome availability may differ from desktop Chrome, especially for experimental WebMCP functionality.
+- WebGPU performance depends on the GPU, drivers, browser, available memory, and selected model.
+- The first model initialization downloads model data and can require significant bandwidth and browser storage.
+- Model inference runs locally in the browser after the required model assets have been downloaded.
+- Internal Chrome pages such as `chrome://gpu` and `chrome://flags` cannot be opened directly by normal website JavaScript.
+- GitHub Pages must serve `index.html` over HTTPS for the production deployment.
