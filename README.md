@@ -1,5 +1,7 @@
 # WebGPU AI Chat
 
+https://mspnetdev.github.io/WebGPUChat/
+
 A lightweight browser-based AI chat application that runs supported language models locally on the GPU through WebGPU and `@mlc-ai/web-llm`.
 
 The interface provides:
