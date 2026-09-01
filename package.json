@@ -1,0 +1,12 @@
+{
+  "name": "webgpu-local-chat",
+  "version": "1.0.0",
+  "description": "Chat AI locale in WebGPU",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@mlc-ai/web-llm": "^0.2.70"
+  }
+}
