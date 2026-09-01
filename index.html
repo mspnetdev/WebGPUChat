@@ -191,6 +191,7 @@
                 border-radius: 4px;
                 font-family: monospace;
                 width: 110px;
+                flex: 0 0 110px;
                 text-align: center;
                 cursor: pointer;
                 font-weight: bold;
@@ -267,7 +268,7 @@
     </div>
 
     <script type="module">
-        import * as webllm from "./node_modules/@mlc-ai/web-llm/lib/index.js";
+        import * as webllm from "https://esm.run/@mlc-ai/web-llm";
 
         const statusDiv = document.getElementById("status");
         const chatContainer = document.getElementById("chat-container");

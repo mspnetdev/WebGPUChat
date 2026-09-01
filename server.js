@@ -6,8 +6,8 @@ const PORT = 3000;
 
 const server = http.createServer((req, res) => {
     // Gestione della rotta principale
-    let filePath = req.url === '/' || req.url === '/WebGPUChat.html' 
-        ? path.join(__dirname, 'WebGPUChat.html') 
+    let filePath = req.url === '/' || req.url === '/index.html' 
+        ? path.join(__dirname, 'index.html') 
         : path.join(__dirname, req.url);
 
     // Identifica l'estensione del file per impostare i giusti Header di sicurezza
