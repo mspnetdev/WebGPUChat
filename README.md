@@ -122,16 +122,24 @@ The application includes a **Copy WebMCP Chrome Flag** button because a web page
 
 ```text
 WebGPUChat/
-├── index.html
+├── index.html          # the whole application: markup, styles, module script
+├── server.js           # optional static server for local development
+├── package.json        # local tooling metadata and the pinned WebLLM version
+├── package-lock.json
 ├── README.md
 └── .gitignore
 ```
 
-The application imports WebLLM from the CDN:
+The application imports WebLLM from the CDN, pinned to an exact version so an
+upstream release cannot change the behaviour of the deployed page:
 
 ```javascript
-import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+import * as webllm from "https://esm.run/@mlc-ai/web-llm@0.2.84";
 ```
+
+The same version is declared in `package.json`. When upgrading WebLLM, change
+the version in both places so the local dependency and the CDN import stay in
+sync.
 
 Do not publish `node_modules` to GitHub Pages.
 
@@ -153,6 +161,20 @@ http://localhost:8080/
 
 ### Node.js
 
+The repository includes a small static server:
+
+```bash
+npm start
+```
+
+Open:
+
+```text
+http://localhost:3000/
+```
+
+Any other static server works as well:
+
 ```bash
 npx serve .
 ```
@@ -170,7 +192,7 @@ index.html
 2. Commit and push the project:
 
 ```bash
-git add index.html README.md .gitignore
+git add index.html server.js package.json package-lock.json README.md .gitignore
 git commit -m "Update WebGPU and WebMCP test interface"
 git push
 ```

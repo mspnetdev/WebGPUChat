@@ -240,72 +240,71 @@
                 <button id="reset-btn" class="btn-action btn-reset" type="button" disabled>Clear VRAM / Reset</button>
             </div>
             <pre id="webgpu-output" class="diagnostic-output">WebGPU diagnostics have not been requested yet.</pre>
-    <div id="top-layout">
-        <div id="config-container">
-            <label for="model-select">
-                <strong>Hardware Model:</strong>
-            </label>
+            <div id="top-layout">
+                <div id="config-container">
+                    <label for="model-select">
+                        <strong>Hardware Model:</strong>
+                    </label>
 
-            <select id="model-select">
-                <!-- Populated via JavaScript -->
-            </select>
+                    <select id="model-select">
+                        <!-- Populated via JavaScript -->
+                    </select>
 
-            <button id="load-btn" class="btn-action" disabled>
-                Initialize
-            </button>
+                    <button id="load-btn" class="btn-action" disabled>
+                        Initialize
+                    </button>
 
-        </div>
+                </div>
 
-        <div id="metrics-container">
-            <div style="
-                    font-weight: bold;
-                    margin-bottom: 6px;
-                    text-decoration: underline;
-                ">
-                GPU METRICS (LIVE)
+                <div id="metrics-container">
+                    <div style="
+                            font-weight: bold;
+                            margin-bottom: 6px;
+                            text-decoration: underline;
+                        ">
+                        GPU METRICS (LIVE)
+                    </div>
+
+                    <div class="metric-line">
+                        <span>Prompt Processing:</span>
+                        <span id="metric-prefill" class="metric-val">- t/s</span>
+                    </div>
+
+                    <div class="metric-line">
+                        <span>Generation:</span>
+                        <span id="metric-decode" class="metric-val">- t/s</span>
+                    </div>
+
+                    <div class="metric-line">
+                        <span>Total Time:</span>
+                        <span id="metric-time" class="metric-val">- ms</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="metric-line">
-                <span>Prompt Processing:</span>
-                <span id="metric-prefill" class="metric-val">- t/s</span>
+            <div id="status">
+                Checking WebGPU hardware requirements...
             </div>
 
-            <div class="metric-line">
-                <span>Generation:</span>
-                <span id="metric-decode" class="metric-val">- t/s</span>
+            <div id="chat-container">
+                <div class="message ai">
+                    Hello! Wait for the VRAM check, select a model, and monitor the graphics card performance
+                    in the upper-right corner.
+                </div>
             </div>
 
-            <div class="metric-line">
-                <span>Total Time:</span>
-                <span id="metric-time" class="metric-val">- ms</span>
+            <div id="input-container">
+                <input type="text" id="user-input" placeholder="Initialize the model before typing..." disabled>
+
+                <button id="send-btn" disabled>
+                    Send
+                </button>
             </div>
-        </div>
-    </div>
-
-    <div id="status">
-        Checking WebGPU hardware requirements...
-    </div>
-
-    <div id="chat-container">
-        <div class="message ai">
-            Hello! Wait for the VRAM check, select a model, and monitor the graphics card performance
-            in the upper-right corner.
-        </div>
-    </div>
-
-    <div id="input-container">
-        <input type="text" id="user-input" placeholder="Initialize the model before typing..." disabled>
-
-        <button id="send-btn" disabled>
-            Send
-        </button>
-    </div>
-
         </section>
     </main>
 
     <script type="module">
-        import * as webllm from "https://esm.run/@mlc-ai/web-llm";
+        import * as webllm from "https://esm.run/@mlc-ai/web-llm@0.2.84";
 
         const statusDiv = document.getElementById("status");
         const chatContainer = document.getElementById("chat-container");
@@ -645,31 +644,21 @@
                     engineMetrics: engine.metrics
                 });
 
-                // Write the actual values to the page metrics widget
+                // Write the actual values to the page metrics widget.
+                // "n/a" means the engine reported no throughput for this turn,
+                // not that the measurement succeeded.
                 metricPrefill.innerText =
                     prefillSpeed > 0
                         ? `${prefillSpeed.toFixed(1)} t/s`
-                        : "Calculated (OK)";
+                        : "n/a";
 
                 metricDecode.innerText =
                     decodeSpeed > 0
                         ? `${decodeSpeed.toFixed(1)} t/s`
-                        : "Running";
+                        : "n/a";
 
                 metricTime.innerText =
                     `${Math.round(totalDurationMs)} ms`;
-
-                // If the engine populated detailed metrics in the background,
-                // overwrite them for maximum accuracy
-                if (prefillSpeed > 0) {
-                    metricPrefill.innerText =
-                        `${prefillSpeed.toFixed(1)} t/s`;
-                }
-
-                if (decodeSpeed > 0) {
-                    metricDecode.innerText =
-                        `${decodeSpeed.toFixed(1)} t/s`;
-                }
             } catch (error) {
                 aiMessageDiv.innerText =
                     "Compute shader execution error.";
@@ -833,7 +822,7 @@
             sendMessage
         );
 
-        userInput.addEventListener("keypress", event => {
+        userInput.addEventListener("keydown", event => {
             if (event.key === "Enter") {
                 sendMessage();
             }

@@ -7,6 +7,6 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@mlc-ai/web-llm": "^0.2.70"
+    "@mlc-ai/web-llm": "0.2.84"
   }
 }
